@@ -5,7 +5,7 @@ A Chat Helper for Flutter using Firebase as backend services.
 ## Getting Started
 Add this to your package's pubspec.yaml file:<br/>
 dependencies:<br/>
-flutter_chat: ^0.1.2<br/>
+## flutter_chat: ^0.1.2<br/>
 
 You can install packages from the command line:<br/> with Flutter:<br/> $ flutter pub get<br/>
 
