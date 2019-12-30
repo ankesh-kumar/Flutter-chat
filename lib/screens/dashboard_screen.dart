@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/chatWidget.dart';
 import '../chatData.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -29,10 +30,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ChatData.getAppBar(),
+      appBar: ChatWidget.getAppBar(),
       backgroundColor: Colors.white,
       body: WillPopScope(
-        child: ChatData.userListStack(widget.currentUserId, context),
+        child: ChatWidget.userListStack(widget.currentUserId, context),
         onWillPop: onBackPress,
       ),
     );

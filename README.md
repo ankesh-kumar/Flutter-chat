@@ -22,4 +22,24 @@ Steps:<br/>
    ChatData.widgetWelcomeScreen(context)<br/>
 
 
+## Useful Methods:
+
+Auth user from Google SignIn, if user is using app first time,<br/>
+then user data store in firestore in "users" document,<br/>
+send true if authenticated,else false<br/>
+##authUsersGoogle() → Future<bool>
+
+
+
+check if user is loggedin in app<br/>
+## isSignedIn() → Future<bool>
+
+Check user authentication, if authenticated then show dashboard screen, else login screen<br/>
+## authUser(BuildContext context) → void
+
+used to create splash screen, shows splash for 2 sec and then call to check authentication<br/>
+## startTime(BuildContext context) → Future
+
 Now enjoy the chat.
+
+

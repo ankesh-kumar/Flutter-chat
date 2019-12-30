@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../chatData.dart';
+import '../chatWidget.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String id = "login_screen";
@@ -20,6 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
-        body: ChatData.widgetLoginScreen(context));
+        body: ChatWidget.widgetLoginScreen(context));
   }
 }

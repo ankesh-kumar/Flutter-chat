@@ -9,7 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../constants.dart';
-import 'fullPhoto.dart';
+import 'zoomImage.dart';
 
 class Chat extends StatelessWidget {
   final String peerId;
@@ -222,7 +222,7 @@ class _ChatScreenState extends State<_ChatScreen> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => FullPhoto(url: chatContent)));
+                  builder: (context) => ZoomImage(url: chatContent)));
         },
         padding: EdgeInsets.all(0),
       ),

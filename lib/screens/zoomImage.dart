@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../chatData.dart';
+import '../chatWidget.dart';
 import '../constants.dart';
 
-class FullPhoto extends StatelessWidget {
+class ZoomImage extends StatelessWidget {
   final String url;
-  static const String id = "fullPhoto";
-  FullPhoto({Key key, @required this.url}) : super(key: key);
+  static const String id = "ZoomImage";
+  ZoomImage({Key key, @required this.url}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,24 +20,24 @@ class FullPhoto extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: new FullPhotoScreen(url: url),
+      body: new ZoomImageScreen(url: url),
     );
   }
 }
 
-class FullPhotoScreen extends StatefulWidget {
+class ZoomImageScreen extends StatefulWidget {
   final String url;
 
-  FullPhotoScreen({Key key, @required this.url}) : super(key: key);
+  ZoomImageScreen({Key key, @required this.url}) : super(key: key);
 
   @override
-  State createState() => new FullPhotoScreenState(url: url);
+  State createState() => new ZoomImageScreenState(url: url);
 }
 
-class FullPhotoScreenState extends State<FullPhotoScreen> {
+class ZoomImageScreenState extends State<ZoomImageScreen> {
   final String url;
 
-  FullPhotoScreenState({Key key, @required this.url});
+  ZoomImageScreenState({Key key, @required this.url});
 
   @override
   void initState() {
@@ -45,6 +46,6 @@ class FullPhotoScreenState extends State<FullPhotoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ChatData.widgetFullPhoto(context, url);
+    return ChatWidget.widgetFullPhoto(context, url);
   }
 }

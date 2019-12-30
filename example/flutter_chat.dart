@@ -1,5 +1,6 @@
 import 'package:flutter_chat/chatData.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/chatWidget.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = "welcome_screen";
@@ -17,8 +18,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: ChatData.getAppBar(),
+        appBar: ChatWidget.getAppBar(),
         backgroundColor: Colors.white,
-        body: ChatData.widgetWelcomeScreen(context));
+        body: ChatWidget.widgetWelcomeScreen(context));
   }
 }
