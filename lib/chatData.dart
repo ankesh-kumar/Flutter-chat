@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/chatWidget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
@@ -40,10 +41,7 @@ class ChatData {
                       ),
                       margin: EdgeInsets.only(bottom: 10.0),
                     ),
-                    Text(
-                      'Are you sure to exit app?',
-                      style: TextStyle(color: Colors.white70, fontSize: 14.0),
-                    ),
+                    ChatWidget.widgetShowText('Are you sure to exit app?', '',''),
                   ],
                 ),
               ),
@@ -60,11 +58,7 @@ class ChatData {
                       ),
                       margin: EdgeInsets.only(right: 10.0),
                     ),
-                    Text(
-                      'CANCEL',
-                      style: TextStyle(
-                          color: Colors.white70, fontWeight: FontWeight.bold),
-                    )
+                    ChatWidget.widgetShowText('Cancel', '',''),
                   ],
                 ),
               ),
@@ -81,11 +75,7 @@ class ChatData {
                       ),
                       margin: EdgeInsets.only(right: 10.0),
                     ),
-                    Text(
-                      'YES',
-                      style: TextStyle(
-                          color: Colors.white70, fontWeight: FontWeight.bold),
-                    )
+                    ChatWidget.widgetShowText('Yes', '',''),
                   ],
                 ),
               ),
@@ -173,7 +163,6 @@ class ChatData {
     startTime(context);
   }
 
-
   static checkUserLogin(BuildContext context) async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
@@ -203,15 +192,10 @@ class ChatData {
     }
   }
 
-
   static startTime(BuildContext context) async {
     var _duration = new Duration(seconds: 2);
     return new Timer(_duration, checkUserLogin(context));
   }
-
-
-
-
 
   static bool isLastMessageLeft(var listMessage,String id,int index) {
     if ((index > 0 &&

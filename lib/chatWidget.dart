@@ -1,11 +1,9 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/screens/zoomImage.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
-
 import 'chatData.dart';
 import 'constants.dart';
 import 'screens/chat.dart';
@@ -54,11 +52,7 @@ class ChatWidget{
             children: <Widget>[
               Material(
                 child: document['photoUrl'] != null
-                    ? (Image.network(
-                  document['photoUrl'],
-                  height: 50.0,
-                  width: 50.0,
-                ))
+                    ? widgetShowImages(document['photoUrl'],100)
                     : Icon(
                   Icons.account_circle,
                   size: 50.0,
@@ -168,25 +162,7 @@ class ChatWidget{
   }
 
   static Widget widgetWelcomeScreen(BuildContext context) {
-    // return
-    // FutureBuilder<Widget>(
-    //         future: ChatData.widgetDynamic(context),
-    //          builder: (BuildContext context, AsyncSnapshot snapshot) {
 
-    //               if(snapshot.hasData){
-    //                     if(snapshot.data!=null){
-    //                       return snapshot.data;
-    //                     }
-
-    //                 }
-    //                     else
-    //                     {
-    //                       return Container();
-    //                     }
-
-    //         },
-
-    //   );
     return Center(
       child: Container(
           child: Text(
@@ -200,8 +176,7 @@ class ChatWidget{
     return Container(child: PhotoView(imageProvider: NetworkImage(url)));
   }
 
-
-  static Widget buildItem(BuildContext context,var listMessage,String id, int index, DocumentSnapshot document,String peerAvatar) {
+  static Widget widgetChatBuildItem(BuildContext context,var listMessage,String id, int index, DocumentSnapshot document,String peerAvatar) {
     if (document['idFrom'] == id) {
       return Row(
         children: <Widget>[
@@ -219,11 +194,7 @@ class ChatWidget{
               children: <Widget>[
                 ChatData.isLastMessageLeft(listMessage,id,index)
                     ? Material(
-                  child: Image.network(
-                    peerAvatar,
-                    height: 35.0,
-                    width: 35.0,
-                  ),
+                  child: widgetShowImages(peerAvatar, 35),
                   borderRadius: BorderRadius.all(
                     Radius.circular(18.0),
                   ),
@@ -259,7 +230,7 @@ class ChatWidget{
     }
   }
 
-  static Widget buildListMessage(groupChatId,listMessage,currentUserId,peerAvatar,listScrollController) {
+  static Widget widgetChatBuildListMessage(groupChatId,listMessage,currentUserId,peerAvatar,listScrollController) {
     return Flexible(
       child: groupChatId == ''
           ? Center(
@@ -284,7 +255,7 @@ class ChatWidget{
             return ListView.builder(
               padding: EdgeInsets.all(10.0),
               itemBuilder: (context, index) =>
-                  ChatWidget.buildItem(context,listMessage,currentUserId,index,
+                  ChatWidget.widgetChatBuildItem(context,listMessage,currentUserId,index,
                       snapshot.data.documents[index],peerAvatar),
               itemCount: snapshot.data.documents.length,
               reverse: true,
@@ -318,14 +289,7 @@ class ChatWidget{
     return Container(
       child: FlatButton(
         child: Material(
-          child: CachedNetworkImage(
-            imageUrl: chatContent,
-            height: 100,
-            width: 100,
-            placeholder: (context, url) => CircularProgressIndicator(),
-            errorWidget: (context, url, error) => Icon(Icons.error),
-          ),
-          //Image.network(chatContent,height: 200.0,width: 200.0,),
+          child: widgetShowImages(chatContent,50),
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
           clipBehavior: Clip.hardEdge,
         ),
@@ -344,6 +308,19 @@ class ChatWidget{
     );
   }
 
+  // Show Images from network
+  static Widget widgetShowImages(String imageUrl,double imageSize){
+   return CachedNetworkImage(
+     imageUrl: imageUrl,
+     height: imageSize,
+     width: imageSize,
+     placeholder: (context, url) => CircularProgressIndicator(),
+     errorWidget: (context, url, error) => Icon(Icons.error),
+   );
+ }
 
-
+  static Widget widgetShowText(String text,dynamic textSize,dynamic textColor){
+    return Text('$text',
+           style: TextStyle(color: (textColor=='')?Colors.white70:textColor, fontSize: textSize==''?14.0:textSize),);
+  }
 }
