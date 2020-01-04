@@ -1,15 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl/intl.dart';
 import 'constants.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/zoomImage.dart';
 
 class ChatData {
   static String appName = "";
@@ -205,4 +208,34 @@ class ChatData {
     var _duration = new Duration(seconds: 2);
     return new Timer(_duration, checkUserLogin(context));
   }
+
+
+
+
+
+  static bool isLastMessageLeft(var listMessage,String id,int index) {
+    if ((index > 0 &&
+        listMessage != null &&
+        listMessage[index - 1]['idFrom'] == id) ||
+        index == 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static bool isLastMessageRight(var listMessage,String id,int index) {
+
+    if ((index > 0 &&
+        listMessage != null &&
+        listMessage[index - 1]['idFrom'] != id) ||
+        index == 0) {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+
+
 }

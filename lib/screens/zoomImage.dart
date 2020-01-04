@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-import '../chatData.dart';
 import '../chatWidget.dart';
 import '../constants.dart';
 

@@ -4,10 +4,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/chatWidget.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import '../chatData.dart';
 import '../constants.dart';
 import 'zoomImage.dart';
 
@@ -185,144 +187,8 @@ class _ChatScreenState extends State<_ChatScreen> {
     }
   }
 
-  Widget chatText(String chatContent, int index, bool logUserMsg) {
-    return Container(
-      child: Text(
-        chatContent,
-        style: TextStyle(color: logUserMsg ? primaryColor : Colors.white),
-      ),
-      padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-      width: 200.0,
-      decoration: BoxDecoration(
-          color: logUserMsg ? greyColor2 : primaryColor,
-          borderRadius: BorderRadius.circular(8.0)),
-      margin: logUserMsg
-          ? EdgeInsets.only(
-              bottom: isLastMessageRight(index) ? 20.0 : 10.0, right: 10.0)
-          : EdgeInsets.only(left: 10.0),
-    );
-  }
-
-  Widget chatImage(String chatContent, int index, bool logUserMsg) {
-    return Container(
-      child: FlatButton(
-        child: Material(
-          child: CachedNetworkImage(
-            imageUrl: chatContent,
-            height: 100,
-            width: 100,
-            placeholder: (context, url) => CircularProgressIndicator(),
-            errorWidget: (context, url, error) => Icon(Icons.error),
-          ),
-          //Image.network(chatContent,height: 200.0,width: 200.0,),
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-          clipBehavior: Clip.hardEdge,
-        ),
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => ZoomImage(url: chatContent)));
-        },
-        padding: EdgeInsets.all(0),
-      ),
-      margin: logUserMsg
-          ? EdgeInsets.only(
-              bottom: isLastMessageRight(index) ? 20.0 : 10.0, right: 10.0)
-          : EdgeInsets.only(left: 10.0),
-    );
-  }
-
-  Widget buildItem(int index, DocumentSnapshot document) {
-    if (document['idFrom'] == id) {
-      return Row(
-        children: <Widget>[
-          document['type'] == 0
-              ? chatText(document['content'], index, true)
-              : chatImage(document['content'], index, true)
-        ],
-        mainAxisAlignment: MainAxisAlignment.end,
-      );
-    } else {
-      return Container(
-        child: Column(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                isLastMessageLeft(index)
-                    ? Material(
-                        child: Image.network(
-                          peerAvatar,
-                          height: 35.0,
-                          width: 35.0,
-                        ),
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(18.0),
-                        ),
-                        clipBehavior: Clip.hardEdge,
-                      )
-                    : Container(width: 35.0),
-                document['type'] == 0
-                    ? chatText(document['content'], index, false)
-                    : chatImage(document['content'], index, false)
-              ],
-            ),
-
-            // Time
-            isLastMessageLeft(index)
-                ? Container(
-                    child: Text(
-                      DateFormat('dd MMM kk:mm').format(
-                          DateTime.fromMillisecondsSinceEpoch(
-                              int.parse(document['timestamp']))),
-                      style: TextStyle(
-                          color: greyColor,
-                          fontSize: 12.0,
-                          fontStyle: FontStyle.italic),
-                    ),
-                    margin: EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
-                  )
-                : Container()
-          ],
-          crossAxisAlignment: CrossAxisAlignment.start,
-        ),
-        margin: EdgeInsets.only(bottom: 10.0),
-      );
-    }
-  }
-
-  bool isLastMessageLeft(int index) {
-    if ((index > 0 &&
-            listMessage != null &&
-            listMessage[index - 1]['idFrom'] == id) ||
-        index == 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  bool isLastMessageRight(int index) {
-    if ((index > 0 &&
-            listMessage != null &&
-            listMessage[index - 1]['idFrom'] != id) ||
-        index == 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   Future<bool> onBackPress() {
-    // if (isShowSticker) {
-    //   setState(() {
-    //     isShowSticker = false;
-    //   });
-    // } else {
-    //   Firestore.instance.collection('users').document(id).updateData({'chattingWith': null});
-    Navigator.pop(context);
-    //}
-
+       Navigator.pop(context);
     return Future.value(false);
   }
 
@@ -334,7 +200,7 @@ class _ChatScreenState extends State<_ChatScreen> {
           Column(
             children: <Widget>[
               // List of messages
-              buildListMessage(),
+              ChatWidget.buildListMessage(groupChatId,listMessage,widget.currentUserId,peerAvatar,listScrollController),
 
               // Input content
               buildInput(),
@@ -428,39 +294,4 @@ class _ChatScreenState extends State<_ChatScreen> {
     );
   }
 
-  Widget buildListMessage() {
-    return Flexible(
-      child: groupChatId == ''
-          ? Center(
-              child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
-          : StreamBuilder(
-              stream: Firestore.instance
-                  .collection('messages')
-                  .document(groupChatId)
-                  .collection(groupChatId)
-                  .orderBy('timestamp', descending: true)
-                  .limit(20)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(
-                      child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(themeColor)));
-                } else {
-                  listMessage = snapshot.data.documents;
-                  return ListView.builder(
-                    padding: EdgeInsets.all(10.0),
-                    itemBuilder: (context, index) =>
-                        buildItem(index, snapshot.data.documents[index]),
-                    itemCount: snapshot.data.documents.length,
-                    reverse: true,
-                    controller: listScrollController,
-                  );
-                }
-              },
-            ),
-    );
-  }
 }

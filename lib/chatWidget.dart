@@ -1,6 +1,9 @@
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/screens/zoomImage.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'chatData.dart';
@@ -164,7 +167,6 @@ class ChatWidget{
     );
   }
 
-
   static Widget widgetWelcomeScreen(BuildContext context) {
     // return
     // FutureBuilder<Widget>(
@@ -197,5 +199,151 @@ class ChatWidget{
   static Widget widgetFullPhoto(BuildContext context, String url) {
     return Container(child: PhotoView(imageProvider: NetworkImage(url)));
   }
+
+
+  static Widget buildItem(BuildContext context,var listMessage,String id, int index, DocumentSnapshot document,String peerAvatar) {
+    if (document['idFrom'] == id) {
+      return Row(
+        children: <Widget>[
+          document['type'] == 0
+              ? chatText(document['content'],id,listMessage, index, true)
+              : chatImage(context,id,listMessage,document['content'], index, true)
+        ],
+        mainAxisAlignment: MainAxisAlignment.end,
+      );
+    } else {
+      return Container(
+        child: Column(
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                ChatData.isLastMessageLeft(listMessage,id,index)
+                    ? Material(
+                  child: Image.network(
+                    peerAvatar,
+                    height: 35.0,
+                    width: 35.0,
+                  ),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(18.0),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                )
+                    : Container(width: 35.0),
+                document['type'] == 0
+                    ? chatText(document['content'],id,listMessage, index, false)
+                    : chatImage(context,id,listMessage,document['content'], index, false)
+              ],
+            ),
+
+            // Time
+            ChatData.isLastMessageLeft(listMessage,id,index)
+                ? Container(
+              child: Text(
+                DateFormat('dd MMM kk:mm').format(
+                    DateTime.fromMillisecondsSinceEpoch(
+                        int.parse(document['timestamp']))),
+                style: TextStyle(
+                    color: greyColor,
+                    fontSize: 12.0,
+                    fontStyle: FontStyle.italic),
+              ),
+              margin: EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
+            )
+                : Container()
+          ],
+          crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+        margin: EdgeInsets.only(bottom: 10.0),
+      );
+    }
+  }
+
+  static Widget buildListMessage(groupChatId,listMessage,currentUserId,peerAvatar,listScrollController) {
+    return Flexible(
+      child: groupChatId == ''
+          ? Center(
+          child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
+          : StreamBuilder(
+        stream: Firestore.instance
+            .collection('messages')
+            .document(groupChatId)
+            .collection(groupChatId)
+            .orderBy('timestamp', descending: true)
+            .limit(20)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+                child: CircularProgressIndicator(
+                    valueColor:
+                    AlwaysStoppedAnimation<Color>(themeColor)));
+          } else {
+            listMessage = snapshot.data.documents;
+            return ListView.builder(
+              padding: EdgeInsets.all(10.0),
+              itemBuilder: (context, index) =>
+                  ChatWidget.buildItem(context,listMessage,currentUserId,index,
+                      snapshot.data.documents[index],peerAvatar),
+              itemCount: snapshot.data.documents.length,
+              reverse: true,
+              controller: listScrollController,
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  static Widget chatText(String chatContent,String id,var listMessage, int index, bool logUserMsg) {
+    return Container(
+      child: Text(
+        chatContent,
+        style: TextStyle(color: logUserMsg ? primaryColor : Colors.white),
+      ),
+      padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+      width: 200.0,
+      decoration: BoxDecoration(
+          color: logUserMsg ? greyColor2 : primaryColor,
+          borderRadius: BorderRadius.circular(8.0)),
+      margin: logUserMsg
+          ? EdgeInsets.only(
+          bottom: ChatData.isLastMessageRight(listMessage,id,index) ? 20.0 : 10.0, right: 10.0)
+          : EdgeInsets.only(left: 10.0),
+    );
+  }
+
+  static Widget chatImage(BuildContext context,String id,var listMessage,String chatContent, int index, bool logUserMsg) {
+    return Container(
+      child: FlatButton(
+        child: Material(
+          child: CachedNetworkImage(
+            imageUrl: chatContent,
+            height: 100,
+            width: 100,
+            placeholder: (context, url) => CircularProgressIndicator(),
+            errorWidget: (context, url, error) => Icon(Icons.error),
+          ),
+          //Image.network(chatContent,height: 200.0,width: 200.0,),
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          clipBehavior: Clip.hardEdge,
+        ),
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ZoomImage(url: chatContent)));
+        },
+        padding: EdgeInsets.all(0),
+      ),
+      margin: logUserMsg
+          ? EdgeInsets.only(
+          bottom: ChatData.isLastMessageRight(listMessage,id,index) ? 20.0 : 10.0, right: 10.0)
+          : EdgeInsets.only(left: 10.0),
+    );
+  }
+
+
 
 }
