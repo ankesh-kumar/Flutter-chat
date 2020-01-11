@@ -1,19 +1,15 @@
 import 'dart:async';
 import 'dart:io';
-
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat/chatWidget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:intl/intl.dart';
+import 'chatDB.dart';
+import 'chatWidget.dart';
 import 'constants.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/login_screen.dart';
-import 'screens/zoomImage.dart';
 
 class ChatData {
   static String appName = "";
@@ -41,7 +37,8 @@ class ChatData {
                       ),
                       margin: EdgeInsets.only(bottom: 10.0),
                     ),
-                    ChatWidget.widgetShowText('Are you sure to exit app?', '',''),
+                    ChatWidget.widgetShowText(
+                        'Are you sure to exit app?', '', ''),
                   ],
                 ),
               ),
@@ -58,7 +55,7 @@ class ChatData {
                       ),
                       margin: EdgeInsets.only(right: 10.0),
                     ),
-                    ChatWidget.widgetShowText('Cancel', '',''),
+                    ChatWidget.widgetShowText('Cancel', '', ''),
                   ],
                 ),
               ),
@@ -75,7 +72,7 @@ class ChatData {
                       ),
                       margin: EdgeInsets.only(right: 10.0),
                     ),
-                    ChatWidget.widgetShowText('Yes', '',''),
+                    ChatWidget.widgetShowText('Yes', '', ''),
                   ],
                 ),
               ),
@@ -99,7 +96,7 @@ class ChatData {
   }
 
   static Future<bool> authUsersGoogle() async {
-    final String dbUser = "users";
+    
     final GoogleSignIn googleSignIn = GoogleSignIn();
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
@@ -116,29 +113,13 @@ class ChatData {
 
     if (logInUser != null) {
       // Check is already sign up
-      final QuerySnapshot result = await Firestore.instance
-          .collection('$dbUser')
-          .where('id', isEqualTo: logInUser.uid)
-          .getDocuments();
-      final List<DocumentSnapshot> documents = result.documents;
-      if (documents.length == 0) {
-        // Update data to server if new user
-        Firestore.instance
-            .collection('$dbUser')
-            .document(logInUser.uid)
-            .setData({
-          'nickname': logInUser.displayName,
-          'photoUrl': logInUser.photoUrl,
-          'id': logInUser.uid,
-          'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
-          'chattingWith': null
-        });
-      }
+        await ChatDBFireStore.checkUserExists(logInUser);
       return true;
     } else {
       return false;
     }
   }
+
 
   static Future<bool> isSignedIn() async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -197,10 +178,10 @@ class ChatData {
     return new Timer(_duration, checkUserLogin(context));
   }
 
-  static bool isLastMessageLeft(var listMessage,String id,int index) {
+  static bool isLastMessageLeft(var listMessage, String id, int index) {
     if ((index > 0 &&
-        listMessage != null &&
-        listMessage[index - 1]['idFrom'] == id) ||
+            listMessage != null &&
+            listMessage[index - 1]['idFrom'] == id) ||
         index == 0) {
       return true;
     } else {
@@ -208,18 +189,14 @@ class ChatData {
     }
   }
 
-  static bool isLastMessageRight(var listMessage,String id,int index) {
-
+  static bool isLastMessageRight(var listMessage, String id, int index) {
     if ((index > 0 &&
-        listMessage != null &&
-        listMessage[index - 1]['idFrom'] != id) ||
+            listMessage != null &&
+            listMessage[index - 1]['idFrom'] != id) ||
         index == 0) {
       return true;
     } else {
       return false;
     }
-
   }
-
-
 }

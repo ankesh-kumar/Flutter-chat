@@ -1,22 +1,22 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat/screens/zoomImage.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
+import 'chatDB.dart';
 import 'chatData.dart';
 import 'constants.dart';
 import 'screens/chat.dart';
+import 'screens/zoomImage.dart';
 
-class ChatWidget{
-
+class ChatWidget {
   static Widget userListStack(String currentUserId, BuildContext context) {
     return Stack(
       children: <Widget>[
         // List
         Container(
           child: StreamBuilder(
-            stream: Firestore.instance.collection('users').snapshots(),
+            stream: ChatDBFireStore.streamChatData(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return Center(
@@ -52,12 +52,12 @@ class ChatWidget{
             children: <Widget>[
               Material(
                 child: document['photoUrl'] != null
-                    ? widgetShowImages(document['photoUrl'],100)
+                    ? widgetShowImages(document['photoUrl'], 100)
                     : Icon(
-                  Icons.account_circle,
-                  size: 50.0,
-                  color: colorPrimaryDark,
-                ),
+                        Icons.account_circle,
+                        size: 50.0,
+                        color: colorPrimaryDark,
+                      ),
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
                 clipBehavior: Clip.hardEdge,
               ),
@@ -85,16 +85,16 @@ class ChatWidget{
                 context,
                 MaterialPageRoute(
                     builder: (context) => Chat(
-                      currentUserId: currentUserId,
-                      peerId: document.documentID,
-                      peerName: document['nickname'],
-                      peerAvatar: document['photoUrl'],
-                    )));
+                          currentUserId: currentUserId,
+                          peerId: document.documentID,
+                          peerName: document['nickname'],
+                          peerAvatar: document['photoUrl'],
+                        )));
           },
           color: viewBg,
           padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
           shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
         margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
       );
@@ -162,13 +162,12 @@ class ChatWidget{
   }
 
   static Widget widgetWelcomeScreen(BuildContext context) {
-
     return Center(
       child: Container(
           child: Text(
-            ChatData.appName,
-            style: TextStyle(fontSize: 28),
-          )),
+        ChatData.appName,
+        style: TextStyle(fontSize: 28),
+      )),
     );
   }
 
@@ -176,13 +175,15 @@ class ChatWidget{
     return Container(child: PhotoView(imageProvider: NetworkImage(url)));
   }
 
-  static Widget widgetChatBuildItem(BuildContext context,var listMessage,String id, int index, DocumentSnapshot document,String peerAvatar) {
+  static Widget widgetChatBuildItem(BuildContext context, var listMessage,
+      String id, int index, DocumentSnapshot document, String peerAvatar) {
     if (document['idFrom'] == id) {
       return Row(
         children: <Widget>[
           document['type'] == 0
-              ? chatText(document['content'],id,listMessage, index, true)
-              : chatImage(context,id,listMessage,document['content'], index, true)
+              ? chatText(document['content'], id, listMessage, index, true)
+              : chatImage(
+                  context, id, listMessage, document['content'], index, true)
         ],
         mainAxisAlignment: MainAxisAlignment.end,
       );
@@ -192,35 +193,37 @@ class ChatWidget{
           children: <Widget>[
             Row(
               children: <Widget>[
-                ChatData.isLastMessageLeft(listMessage,id,index)
+                ChatData.isLastMessageLeft(listMessage, id, index)
                     ? Material(
-                  child: widgetShowImages(peerAvatar, 35),
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(18.0),
-                  ),
-                  clipBehavior: Clip.hardEdge,
-                )
+                        child: widgetShowImages(peerAvatar, 35),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(18.0),
+                        ),
+                        clipBehavior: Clip.hardEdge,
+                      )
                     : Container(width: 35.0),
                 document['type'] == 0
-                    ? chatText(document['content'],id,listMessage, index, false)
-                    : chatImage(context,id,listMessage,document['content'], index, false)
+                    ? chatText(
+                        document['content'], id, listMessage, index, false)
+                    : chatImage(context, id, listMessage, document['content'],
+                        index, false)
               ],
             ),
 
             // Time
-            ChatData.isLastMessageLeft(listMessage,id,index)
+            ChatData.isLastMessageLeft(listMessage, id, index)
                 ? Container(
-              child: Text(
-                DateFormat('dd MMM kk:mm').format(
-                    DateTime.fromMillisecondsSinceEpoch(
-                        int.parse(document['timestamp']))),
-                style: TextStyle(
-                    color: greyColor,
-                    fontSize: 12.0,
-                    fontStyle: FontStyle.italic),
-              ),
-              margin: EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
-            )
+                    child: Text(
+                      DateFormat('dd MMM kk:mm').format(
+                          DateTime.fromMillisecondsSinceEpoch(
+                              int.parse(document['timestamp']))),
+                      style: TextStyle(
+                          color: greyColor,
+                          fontSize: 12.0,
+                          fontStyle: FontStyle.italic),
+                    ),
+                    margin: EdgeInsets.only(left: 50.0, top: 5.0, bottom: 5.0),
+                  )
                 : Container()
           ],
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,44 +233,51 @@ class ChatWidget{
     }
   }
 
-  static Widget widgetChatBuildListMessage(groupChatId,listMessage,currentUserId,peerAvatar,listScrollController) {
+  static Widget widgetChatBuildListMessage(groupChatId, listMessage,
+      currentUserId, peerAvatar, listScrollController) {
     return Flexible(
       child: groupChatId == ''
           ? Center(
-          child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
+              child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
           : StreamBuilder(
-        stream: Firestore.instance
-            .collection('messages')
-            .document(groupChatId)
-            .collection(groupChatId)
-            .orderBy('timestamp', descending: true)
-            .limit(20)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(
-                child: CircularProgressIndicator(
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(themeColor)));
-          } else {
-            listMessage = snapshot.data.documents;
-            return ListView.builder(
-              padding: EdgeInsets.all(10.0),
-              itemBuilder: (context, index) =>
-                  ChatWidget.widgetChatBuildItem(context,listMessage,currentUserId,index,
-                      snapshot.data.documents[index],peerAvatar),
-              itemCount: snapshot.data.documents.length,
-              reverse: true,
-              controller: listScrollController,
-            );
-          }
-        },
-      ),
+              stream: Firestore.instance
+                  .collection('messages')
+                  .document(groupChatId)
+                  .collection(groupChatId)
+                  .orderBy('timestamp', descending: true)
+                  .limit(20)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(
+                      child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(themeColor)));
+                } else {
+                  listMessage = snapshot.data.documents;
+                  return ListView.builder(
+                    padding: EdgeInsets.all(10.0),
+                    itemBuilder: (context, index) =>
+                        ChatWidget.widgetChatBuildItem(
+                            context,
+                            listMessage,
+                            currentUserId,
+                            index,
+                            snapshot.data.documents[index],
+                            peerAvatar),
+                    itemCount: snapshot.data.documents.length,
+                    reverse: true,
+                    controller: listScrollController,
+                  );
+                }
+              },
+            ),
     );
   }
 
-  static Widget chatText(String chatContent,String id,var listMessage, int index, bool logUserMsg) {
+  static Widget chatText(String chatContent, String id, var listMessage,
+      int index, bool logUserMsg) {
     return Container(
       child: Text(
         chatContent,
@@ -280,16 +290,20 @@ class ChatWidget{
           borderRadius: BorderRadius.circular(8.0)),
       margin: logUserMsg
           ? EdgeInsets.only(
-          bottom: ChatData.isLastMessageRight(listMessage,id,index) ? 20.0 : 10.0, right: 10.0)
+              bottom: ChatData.isLastMessageRight(listMessage, id, index)
+                  ? 20.0
+                  : 10.0,
+              right: 10.0)
           : EdgeInsets.only(left: 10.0),
     );
   }
 
-  static Widget chatImage(BuildContext context,String id,var listMessage,String chatContent, int index, bool logUserMsg) {
+  static Widget chatImage(BuildContext context, String id, var listMessage,
+      String chatContent, int index, bool logUserMsg) {
     return Container(
       child: FlatButton(
         child: Material(
-          child: widgetShowImages(chatContent,50),
+          child: widgetShowImages(chatContent, 50),
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
           clipBehavior: Clip.hardEdge,
         ),
@@ -303,24 +317,32 @@ class ChatWidget{
       ),
       margin: logUserMsg
           ? EdgeInsets.only(
-          bottom: ChatData.isLastMessageRight(listMessage,id,index) ? 20.0 : 10.0, right: 10.0)
+              bottom: ChatData.isLastMessageRight(listMessage, id, index)
+                  ? 20.0
+                  : 10.0,
+              right: 10.0)
           : EdgeInsets.only(left: 10.0),
     );
   }
 
   // Show Images from network
-  static Widget widgetShowImages(String imageUrl,double imageSize){
-   return CachedNetworkImage(
-     imageUrl: imageUrl,
-     height: imageSize,
-     width: imageSize,
-     placeholder: (context, url) => CircularProgressIndicator(),
-     errorWidget: (context, url, error) => Icon(Icons.error),
-   );
- }
+  static Widget widgetShowImages(String imageUrl, double imageSize) {
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      height: imageSize,
+      width: imageSize,
+      placeholder: (context, url) => CircularProgressIndicator(),
+      errorWidget: (context, url, error) => Icon(Icons.error),
+    );
+  }
 
-  static Widget widgetShowText(String text,dynamic textSize,dynamic textColor){
-    return Text('$text',
-           style: TextStyle(color: (textColor=='')?Colors.white70:textColor, fontSize: textSize==''?14.0:textSize),);
+  static Widget widgetShowText(
+      String text, dynamic textSize, dynamic textColor) {
+    return Text(
+      '$text',
+      style: TextStyle(
+          color: (textColor == '') ? Colors.white70 : textColor,
+          fontSize: textSize == '' ? 14.0 : textSize),
+    );
   }
 }
