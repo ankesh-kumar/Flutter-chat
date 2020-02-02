@@ -141,7 +141,8 @@ class ChatData {
 
   static init(String applicationName, BuildContext context) {
     appName = applicationName;
-    startTime(context);
+    //startTime(context);
+    checkUserLogin(context);
   }
 
   static checkUserLogin(BuildContext context) async {
@@ -160,7 +161,12 @@ class ChatData {
       final FirebaseUser logInUser =
           (await firebaseAuth.signInWithCredential(credential)).user;
 
-      //return ChatData.userListStack(logInUser.uid, context);
+      /**
+       * Make user online
+       */
+        await ChatDBFireStore.makeUserOnline(logInUser);
+
+
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(

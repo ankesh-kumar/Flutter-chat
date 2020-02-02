@@ -16,7 +16,7 @@ class ChatWidget {
         // List
         Container(
           child: StreamBuilder(
-            stream: ChatDBFireStore.streamChatData(),
+            stream: Firestore.instance.collection(ChatDBFireStore.getDocName()).snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return Center(
@@ -52,7 +52,7 @@ class ChatWidget {
             children: <Widget>[
               Material(
                 child: document['photoUrl'] != null
-                    ? widgetShowImages(document['photoUrl'], 100)
+                    ? widgetShowImages(document['photoUrl'], 50)
                     : Icon(
                         Icons.account_circle,
                         size: 50.0,
@@ -73,11 +73,26 @@ class ChatWidget {
                         alignment: Alignment.centerLeft,
                         margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                       ),
+                     
+
                     ],
                   ),
                   margin: EdgeInsets.only(left: 20.0),
                 ),
               ),
+
+              ConstrainedBox(
+  constraints: new BoxConstraints(
+    minHeight: 10.0,
+    minWidth: 10.0,
+    maxHeight: 30.0,
+    maxWidth: 30.0,
+  ),
+  child: new DecoratedBox(
+    decoration: new BoxDecoration(color:document['isOnline']==true? Colors.greenAccent:Colors.transparent),
+  ),
+),
+
             ],
           ),
           onPressed: () {

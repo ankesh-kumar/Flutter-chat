@@ -3,9 +3,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-import 'Models/UserModel.dart';
-
 class ChatDBFireStore{
 
   static String getDocName(){
@@ -36,7 +33,8 @@ class ChatDBFireStore{
             'photoUrl': logInUser.photoUrl,
             'id': logInUser.uid,
             'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
-            'chattingWith': null
+            'chattingWith': null,
+            'online':null
           });
   }
   
@@ -44,5 +42,14 @@ class ChatDBFireStore{
       Firestore.instance.collection(ChatDBFireStore.getDocName()).snapshots();
   }
 
+
+ static Future<void> makeUserOnline(FirebaseUser logInUser)async{
+    Firestore.instance
+              .collection(getDocName())
+              .document(logInUser.uid)
+              .updateData({
+            'isOnline':true
+          });
+  }
 
 }
