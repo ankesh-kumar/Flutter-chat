@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 class ChatDBFireStore{
 
   static String getDocName(){
@@ -14,7 +15,7 @@ class ChatDBFireStore{
     
     final QuerySnapshot result = await Firestore.instance
             .collection(getDocName())
-            .where('id', isEqualTo: logInUser.uid)
+            .where('userId', isEqualTo: logInUser.uid)
             .getDocuments();
         final List<DocumentSnapshot> documents = result.documents;
         if (documents.length == 0) {
@@ -31,7 +32,7 @@ class ChatDBFireStore{
               .setData({
             'nickname': logInUser.displayName,
             'photoUrl': logInUser.photoUrl,
-            'id': logInUser.uid,
+            'userId': logInUser.uid,
             'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
             'chattingWith': null,
             'online':null
@@ -44,12 +45,17 @@ class ChatDBFireStore{
 
 
  static Future<void> makeUserOnline(FirebaseUser logInUser)async{
-    Firestore.instance
-              .collection(getDocName())
-              .document(logInUser.uid)
-              .updateData({
-            'isOnline':true
-          });
+    
+     FirebaseDatabase.instance.reference().child("/status/" + logInUser.uid)
+            .onDisconnect()
+            .set("online");     // Set up the disconnect hook
+            
+    // Firestore.instance
+    //           .collection(getDocName())
+    //           .document(logInUser.uid)
+    //           .updateData({
+    //         'online':true
+    //       });
   }
 
 }

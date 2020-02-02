@@ -41,9 +41,9 @@ class ChatWidget {
 
   static Widget userListbuildItem(
       BuildContext context, String currentUserId, DocumentSnapshot document) {
-    print('firebase ' + document['id']);
+    print('firebase ' + document['userId']);
     print(currentUserId);
-    if (document['id'] == currentUserId) {
+    if (document['userId'] == currentUserId) {
       return Container();
     } else {
       return Container(
