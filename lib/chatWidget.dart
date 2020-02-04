@@ -16,7 +16,9 @@ class ChatWidget {
         // List
         Container(
           child: StreamBuilder(
-            stream: Firestore.instance.collection(ChatDBFireStore.getDocName()).snapshots(),
+            stream: Firestore.instance
+                .collection(ChatDBFireStore.getDocName())
+                .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return Center(
@@ -73,26 +75,25 @@ class ChatWidget {
                         alignment: Alignment.centerLeft,
                         margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                       ),
-                     
-
                     ],
                   ),
                   margin: EdgeInsets.only(left: 20.0),
                 ),
               ),
-
               ConstrainedBox(
-  constraints: new BoxConstraints(
-    minHeight: 10.0,
-    minWidth: 10.0,
-    maxHeight: 30.0,
-    maxWidth: 30.0,
-  ),
-  child: new DecoratedBox(
-    decoration: new BoxDecoration(color:document['isOnline']==true? Colors.greenAccent:Colors.transparent),
-  ),
-),
-
+                constraints: new BoxConstraints(
+                  minHeight: 10.0,
+                  minWidth: 10.0,
+                  maxHeight: 30.0,
+                  maxWidth: 30.0,
+                ),
+                child: new DecoratedBox(
+                  decoration: new BoxDecoration(
+                      color: document['online'] == 'online'
+                          ? Colors.greenAccent
+                          : Colors.transparent),
+                ),
+              ),
             ],
           ),
           onPressed: () {

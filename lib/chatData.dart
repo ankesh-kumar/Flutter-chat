@@ -96,7 +96,6 @@ class ChatData {
   }
 
   static Future<bool> authUsersGoogle() async {
-    
     final GoogleSignIn googleSignIn = GoogleSignIn();
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
@@ -113,13 +112,12 @@ class ChatData {
 
     if (logInUser != null) {
       // Check is already sign up
-        await ChatDBFireStore.checkUserExists(logInUser);
+      await ChatDBFireStore.checkUserExists(logInUser);
       return true;
     } else {
       return false;
     }
   }
-
 
   static Future<bool> isSignedIn() async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -164,8 +162,7 @@ class ChatData {
       /**
        * Make user online
        */
-        await ChatDBFireStore.makeUserOnline(logInUser);
-
+      await ChatDBFireStore.makeUserOnline(logInUser);
 
       Navigator.pushReplacement(
           context,
