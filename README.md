@@ -1,43 +1,25 @@
 # flutter_chat
 
-A Chat Helper for Flutter using Firebase as backend services.
-
-## Getting Started
-Add this to your package's pubspec.yaml file:<br/>
-dependencies:<br/>
-## flutter_chat: ^0.1.5<br/>
-
-You can install packages from the command line:<br/> with Flutter:<br/> $ flutter pub get<br/>
-
-Use ChatData.dart for start building your chat.
+A Chat Helper for create chat application in Flutter using Firebase as backend services.
 
 ## Features:
 1. 1-1 chat
 2. User online status
 
-You can use your own widget in Stateful Widget Class.
-Steps:
-1. add firebase in your android and ios project
-2.  Create a Stateful widget class and call the method in body
-    within initState():
-    -> ChatData.init("app name",context); 
-3. and in body of Widget build:
-   -> ChatData.widgetWelcomeScreen(context)
+## Screenshots:
 
-You can use common methods for your application:
-## Useful Methods:
-1. Auth user from Google SignIn, if user is using app first time,
-then user data store in firestore in "users" document,
-send true if authenticated,else false
-authUsersGoogle() → Future
+![login screen](https://1.bp.blogspot.com/-hM837Uh65W0/Xj7adGUmwxI/AAAAAAAANjo/PoDM9bh7rZQqT37yIOu-IXAX4F-5W0NNgCLcBGAsYHQ/s640/splash_screen.jpg)
+![user screen](https://1.bp.blogspot.com/-ok2AZvPw9FY/Xj7adz8i8vI/AAAAAAAANjw/TTXUBkbbBv8Ti4AvzVOVIWo5o_V6Ei63ACLcBGAsYHQ/s640/user_list.jpg)
+![chat screen](https://1.bp.blogspot.com/-r2TK8wT_mV8/Xj7ade30n8I/AAAAAAAANjs/Uw6OQCBpf-Ec0Cm5XB9DIykJ5VGpDfpyACLcBGAsYHQ/s640/chat_screen.jpg)
 
-2. check if user is loggedin with social 
-isSignedIn() → Future
+## Getting Started
+* Add this to your package's pubspec.yaml file:<br/>
+dependencies:<br/>[flutter_chat](https://pub.dev/packages/flutter_chat)
 
-3. Check user authentication, if authenticated then show dashboard screen, else login screen
-authUser(BuildContext context) → void
+* add [firebase](https://firebase.google.com/) in your android and ios project. 
 
-4. used to create splash screen, shows splash for 2 sec and then call to check authentication
-startTime(BuildContext context) → Future
-
-Now enjoy the chat.
+* Create a Stateful widget class and call the method in body (example can be found in Github repo),<br/> 
+    within initState():<br/>
+    -> ChatData.init("app name",context); <br/>
+    and in body of Widget build:<br/>
+    -> ChatData.widgetWelcomeScreen(context)
