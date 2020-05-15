@@ -23,3 +23,8 @@ dependencies:<br/>[flutter_chat](https://pub.dev/packages/flutter_chat)
     -> ChatData.init("app name",context); <br/>
     and in body of Widget build:<br/>
     -> ChatData.widgetWelcomeScreen(context)
+
+
+# Support Development
+[Be Sponsor](https://github.com/sponsors/ankesh-kumar)<br/>
+[![Sponsor](https://1.bp.blogspot.com/-td3V-ijA4Q8/Xr57GVxCyEI/AAAAAAAAORQ/3u78fEKyYkk6aGx8yO1SzeN4Wo9_mr46ACK4BGAsYHg/icons8-love-64.png)](https://github.com/sponsors/ankesh-kumar)
