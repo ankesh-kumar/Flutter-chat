@@ -6,6 +6,15 @@ A Chat Helper for create chat application in Flutter using Firebase as backend s
 1. 1-1 chat
 2. User online status
 
+## Next Future Scope
+
+1. Notification 
+2. Group Chat
+3. User acceptance on chat request
+4. share location on chat
+
+(Sponsor project and support development)
+
 ## Screenshots:
 
 ![login screen](https://1.bp.blogspot.com/-hM837Uh65W0/Xj7adGUmwxI/AAAAAAAANjo/PoDM9bh7rZQqT37yIOu-IXAX4F-5W0NNgCLcBGAsYHQ/s640/splash_screen.jpg)
