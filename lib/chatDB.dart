@@ -23,10 +23,7 @@ class ChatDBFireStore {
   }
 
   static saveNewUser(User logInUser) {
-    FirebaseFirestore.instance
-        .collection(getDocName())
-        .doc(logInUser.uid)
-        .set({
+    FirebaseFirestore.instance.collection(getDocName()).doc(logInUser.uid).set({
       'nickname': logInUser.displayName,
       'photoUrl': logInUser.photoURL,
       'userId': logInUser.uid,

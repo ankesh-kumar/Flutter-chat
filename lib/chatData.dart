@@ -98,12 +98,9 @@ class ChatData {
   }
 
   static Future<bool> authUsersGoogle() async {
-
-
     await Firebase.initializeApp();
     final GoogleSignIn googleSignIn = GoogleSignIn();
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-
 
     GoogleSignInAccount googleUser = await googleSignIn.signIn();
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -113,7 +110,8 @@ class ChatData {
       idToken: googleAuth.idToken,
     );
 
-    final UserCredential logInUser = await firebaseAuth.signInWithCredential(credential);
+    final UserCredential logInUser =
+        await firebaseAuth.signInWithCredential(credential);
 
     if (logInUser != null) {
       // Check is already sign up

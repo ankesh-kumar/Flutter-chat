@@ -198,8 +198,8 @@ class ChatWidget {
         children: <Widget>[
           document.get('type') == 0
               ? chatText(document.get('content'), id, listMessage, index, true)
-              : chatImage(
-                  context, id, listMessage, document.get('content'), index, true)
+              : chatImage(context, id, listMessage, document.get('content'),
+                  index, true)
         ],
         mainAxisAlignment: MainAxisAlignment.end,
       );
@@ -221,8 +221,8 @@ class ChatWidget {
                 document.get('type') == 0
                     ? chatText(
                         document.get('content'), id, listMessage, index, false)
-                    : chatImage(context, id, listMessage, document.get('content'),
-                        index, false)
+                    : chatImage(context, id, listMessage,
+                        document.get('content'), index, false)
               ],
             ),
 

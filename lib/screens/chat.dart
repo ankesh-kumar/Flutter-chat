@@ -9,7 +9,6 @@ import 'package:image_picker/image_picker.dart';
 import '../chatWidget.dart';
 import '../constants.dart';
 
-
 class Chat extends StatelessWidget {
   final String peerId;
   final String peerAvatar;
@@ -185,7 +184,7 @@ class _ChatScreenState extends State<_ChatScreen> {
   }
 
   Future<bool> onBackPress() {
-       Navigator.pop(context);
+    Navigator.pop(context);
     return Future.value(false);
   }
 
@@ -197,7 +196,8 @@ class _ChatScreenState extends State<_ChatScreen> {
           Column(
             children: <Widget>[
               // List of messages
-              ChatWidget.widgetChatBuildListMessage(groupChatId,listMessage,widget.currentUserId,peerAvatar,listScrollController),
+              ChatWidget.widgetChatBuildListMessage(groupChatId, listMessage,
+                  widget.currentUserId, peerAvatar, listScrollController),
 
               // Input content
               buildInput(),
@@ -290,5 +290,4 @@ class _ChatScreenState extends State<_ChatScreen> {
           color: Colors.white),
     );
   }
-
 }

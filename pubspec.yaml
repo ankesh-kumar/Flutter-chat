@@ -1,7 +1,7 @@
 name: flutter_chat
 description: Chat helper for Flutter android and iOS using firebase as backend services.
 
-version: 0.1.4
+version: 1.0.0
 homepage: https://github.com/ankesh-kumar/Flutter-chat-sdk
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
