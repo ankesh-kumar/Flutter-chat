@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -88,6 +89,7 @@ class ChatData {
   }
 
   static Future<Null> handleSignOut(BuildContext context) async {
+    await Firebase.initializeApp();
     final GoogleSignIn googleSignIn = GoogleSignIn();
 
     await FirebaseAuth.instance.signOut();
@@ -96,23 +98,26 @@ class ChatData {
   }
 
   static Future<bool> authUsersGoogle() async {
+
+
+    await Firebase.initializeApp();
     final GoogleSignIn googleSignIn = GoogleSignIn();
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
 
     GoogleSignInAccount googleUser = await googleSignIn.signIn();
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
+    final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
-    final FirebaseUser logInUser =
-        (await firebaseAuth.signInWithCredential(credential)).user;
+    final UserCredential logInUser = await firebaseAuth.signInWithCredential(credential);
 
     if (logInUser != null) {
       // Check is already sign up
-      await ChatDBFireStore.checkUserExists(logInUser);
+      await ChatDBFireStore.checkUserExists(firebaseAuth.currentUser);
       return true;
     } else {
       return false;
@@ -144,6 +149,7 @@ class ChatData {
   }
 
   static checkUserLogin(BuildContext context) async {
+    await Firebase.initializeApp();
     final GoogleSignIn googleSignIn = GoogleSignIn();
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
@@ -151,12 +157,12 @@ class ChatData {
       GoogleSignInAccount googleUser = await googleSignIn.signIn();
       GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      final AuthCredential credential = GoogleAuthProvider.getCredential(
+      final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final FirebaseUser logInUser =
+      final User logInUser =
           (await firebaseAuth.signInWithCredential(credential)).user;
 
       /**
@@ -184,7 +190,7 @@ class ChatData {
   static bool isLastMessageLeft(var listMessage, String id, int index) {
     if ((index > 0 &&
             listMessage != null &&
-            listMessage[index - 1]['idFrom'] == id) ||
+            listMessage[index - 1].get('idFrom') == id) ||
         index == 0) {
       return true;
     } else {
@@ -195,7 +201,7 @@ class ChatData {
   static bool isLastMessageRight(var listMessage, String id, int index) {
     if ((index > 0 &&
             listMessage != null &&
-            listMessage[index - 1]['idFrom'] != id) ||
+            listMessage[index - 1].get('idFrom') != id) ||
         index == 0) {
       return true;
     } else {

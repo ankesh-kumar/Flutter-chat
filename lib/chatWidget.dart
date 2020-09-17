@@ -43,9 +43,9 @@ class ChatWidget {
 
   static Widget userListbuildItem(
       BuildContext context, String currentUserId, DocumentSnapshot document) {
-    print('firebase ' + document['userId']);
+    print('firebase ' + document.get('userId'));
     print(currentUserId);
-    if (document['userId'] == currentUserId) {
+    if (document.get('userId') == currentUserId) {
       return Container();
     } else {
       return Container(
@@ -53,8 +53,8 @@ class ChatWidget {
           child: Row(
             children: <Widget>[
               Material(
-                child: document['photoUrl'] != null
-                    ? widgetShowImages(document['photoUrl'], 50)
+                child: document.get('photoUrl') != null
+                    ? widgetShowImages(document.get('photoUrl'), 50)
                     : Icon(
                         Icons.account_circle,
                         size: 50.0,
@@ -69,7 +69,7 @@ class ChatWidget {
                     children: <Widget>[
                       Container(
                         child: Text(
-                          'Nickname: ${document['nickname']}',
+                          'Nickname: ${document.get('nickname')}',
                           style: TextStyle(color: primaryColor),
                         ),
                         alignment: Alignment.centerLeft,
@@ -89,7 +89,7 @@ class ChatWidget {
                 ),
                 child: new DecoratedBox(
                   decoration: new BoxDecoration(
-                      color: document['online'] == 'online'
+                      color: document.get('online') == 'online'
                           ? Colors.greenAccent
                           : Colors.transparent),
                 ),
@@ -103,8 +103,8 @@ class ChatWidget {
                     builder: (context) => Chat(
                           currentUserId: currentUserId,
                           peerId: document.documentID,
-                          peerName: document['nickname'],
-                          peerAvatar: document['photoUrl'],
+                          peerName: document.get('nickname'),
+                          peerAvatar: document.get('photoUrl'),
                         )));
           },
           color: viewBg,
@@ -193,13 +193,13 @@ class ChatWidget {
 
   static Widget widgetChatBuildItem(BuildContext context, var listMessage,
       String id, int index, DocumentSnapshot document, String peerAvatar) {
-    if (document['idFrom'] == id) {
+    if (document.get('idFrom') == id) {
       return Row(
         children: <Widget>[
-          document['type'] == 0
-              ? chatText(document['content'], id, listMessage, index, true)
+          document.get('type') == 0
+              ? chatText(document.get('content'), id, listMessage, index, true)
               : chatImage(
-                  context, id, listMessage, document['content'], index, true)
+                  context, id, listMessage, document.get('content'), index, true)
         ],
         mainAxisAlignment: MainAxisAlignment.end,
       );
@@ -218,10 +218,10 @@ class ChatWidget {
                         clipBehavior: Clip.hardEdge,
                       )
                     : Container(width: 35.0),
-                document['type'] == 0
+                document.get('type') == 0
                     ? chatText(
-                        document['content'], id, listMessage, index, false)
-                    : chatImage(context, id, listMessage, document['content'],
+                        document.get('content'), id, listMessage, index, false)
+                    : chatImage(context, id, listMessage, document.get('content'),
                         index, false)
               ],
             ),
@@ -232,7 +232,7 @@ class ChatWidget {
                     child: Text(
                       DateFormat('dd MMM kk:mm').format(
                           DateTime.fromMillisecondsSinceEpoch(
-                              int.parse(document['timestamp']))),
+                              int.parse(document.get('timestamp')))),
                       style: TextStyle(
                           color: greyColor,
                           fontSize: 12.0,
@@ -257,9 +257,9 @@ class ChatWidget {
               child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
           : StreamBuilder(
-              stream: Firestore.instance
+              stream: FirebaseFirestore.instance
                   .collection('messages')
-                  .document(groupChatId)
+                  .doc(groupChatId)
                   .collection(groupChatId)
                   .orderBy('timestamp', descending: true)
                   .limit(20)

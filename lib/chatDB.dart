@@ -10,11 +10,11 @@ class ChatDBFireStore {
     return dbUser;
   }
 
-  static Future<void> checkUserExists(FirebaseUser logInUser) async {
-    final QuerySnapshot result = await Firestore.instance
+  static Future<void> checkUserExists(User logInUser) async {
+    final QuerySnapshot result = await FirebaseFirestore.instance
         .collection(getDocName())
         .where('userId', isEqualTo: logInUser.uid)
-        .getDocuments();
+        .get();
     final List<DocumentSnapshot> documents = result.documents;
     if (documents.length == 0) {
       // Update data to server if new user
@@ -22,13 +22,13 @@ class ChatDBFireStore {
     }
   }
 
-  static saveNewUser(FirebaseUser logInUser) {
-    Firestore.instance
+  static saveNewUser(User logInUser) {
+    FirebaseFirestore.instance
         .collection(getDocName())
-        .document(logInUser.uid)
-        .setData({
+        .doc(logInUser.uid)
+        .set({
       'nickname': logInUser.displayName,
-      'photoUrl': logInUser.photoUrl,
+      'photoUrl': logInUser.photoURL,
       'userId': logInUser.uid,
       'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
       'chattingWith': null,
@@ -40,7 +40,7 @@ class ChatDBFireStore {
     Firestore.instance.collection(ChatDBFireStore.getDocName()).snapshots();
   }
 
-  static Future<void> makeUserOnline(FirebaseUser logInUser) async {
+  static Future<void> makeUserOnline(User logInUser) async {
     FirebaseDatabase.instance
         .reference()
         .child("/status/" + logInUser.uid)
