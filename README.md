@@ -1,10 +1,18 @@
 # flutter_chat
-
 A Chat Helper for create chat application in Flutter using Firebase as backend services.
 
+# Support Development
+If you found this project helpful or you learned something from the source code and want to thank me, consider buying me a cup of ☕️
+
+[PayPal](https://paypal.me/ankeshkumar01)
+
+[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="60px" width="200px"/>](https://www.buymeacoffee.com/ankeshkumar)
+
 ## Features:
-1. 1-1 chat
-2. User online status
+1. 1-1 chat.
+2. Chat with only added friends(Privacy). New
+3. Share Pic with Gallery/Camera
+2. User online status 
 
 ## Next Future Scope
 
@@ -13,7 +21,7 @@ A Chat Helper for create chat application in Flutter using Firebase as backend s
 3. User acceptance on chat request
 4. share location on chat
 
-(Sponsor project and support development)
+
 
 ## Screenshots:
 
@@ -25,19 +33,15 @@ A Chat Helper for create chat application in Flutter using Firebase as backend s
 * Add this to your package's pubspec.yaml file:<br/>
 dependencies:<br/>[flutter_chat](https://pub.dev/packages/flutter_chat)
 
-* add [firebase](https://firebase.google.com/) in your android and ios project. 
+* Add [firebase](https://firebase.google.com/) in your android and ios project.
+
+* Deploy "Cloud Function"  on firebase. (provided on cloudFunction folder, used for show user online/offline status).  
 
 * Create a Stateful widget class and call the method in body (example can be found in Github repo),<br/> 
     within initState():<br/>
     -> ChatData.init("app name",context); <br/>
     and in body of Widget build:<br/>
     -> ChatData.widgetWelcomeScreen(context)
-
-
-# Support Development
-If you found this project helpful or you learned something from the source code and want to thank me, consider buying me a cup of ☕️
-
-[PayPal](https://paypal.me/ankeshkumar01)
 
 # Thanks for coffee:
 Eirik Bakken

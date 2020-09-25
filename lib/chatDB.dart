@@ -23,10 +23,14 @@ class ChatDBFireStore {
   }
 
   static saveNewUser(User logInUser) {
+    List<String> friendList = [];
+
     FirebaseFirestore.instance.collection(getDocName()).doc(logInUser.uid).set({
       'nickname': logInUser.displayName,
       'photoUrl': logInUser.photoURL,
       'userId': logInUser.uid,
+      'email': logInUser.email,
+      'friends': friendList,
       'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
       'chattingWith': null,
       'online': null
@@ -34,7 +38,9 @@ class ChatDBFireStore {
   }
 
   static streamChatData() {
-    Firestore.instance.collection(ChatDBFireStore.getDocName()).snapshots();
+    FirebaseFirestore.instance
+        .collection(ChatDBFireStore.getDocName())
+        .snapshots();
   }
 
   static Future<void> makeUserOnline(User logInUser) async {

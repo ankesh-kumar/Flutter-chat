@@ -10,36 +10,21 @@ import 'screens/chat.dart';
 import 'screens/zoomImage.dart';
 
 class ChatWidget {
-  static Widget userListStack(String currentUserId, BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        // List
-        Container(
-          child: StreamBuilder(
-            stream: Firestore.instance
-                .collection(ChatDBFireStore.getDocName())
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                  ),
-                );
-              } else {
-                return ListView.builder(
-                  padding: EdgeInsets.all(10.0),
-                  itemBuilder: (context, index) => userListbuildItem(
-                      context, currentUserId, snapshot.data.documents[index]),
-                  itemCount: snapshot.data.documents.length,
-                );
-              }
-            },
-          ),
-        ),
-      ],
-    );
+  static getFriendList() {
+    List<String> data = [
+      "h7127ZCne0OzSRwNXtktMPei0CH3",
+      "pdj9dlfEQMTUD6s954qiPeplEog2"
+    ];
+    return data;
   }
+
+//static Future<Widget> userListStack(String currentUserId, BuildContext context)  async{
+//
+//    //List<String> friendList=await getFriendList();
+//    List<String> friendList=await getFriendList();
+//
+//    return
+//  }
 
   static Widget userListbuildItem(
       BuildContext context, String currentUserId, DocumentSnapshot document) {
@@ -102,7 +87,7 @@ class ChatWidget {
                 MaterialPageRoute(
                     builder: (context) => Chat(
                           currentUserId: currentUserId,
-                          peerId: document.documentID,
+                          peerId: document.id,
                           peerName: document.get('nickname'),
                           peerAvatar: document.get('photoUrl'),
                         )));

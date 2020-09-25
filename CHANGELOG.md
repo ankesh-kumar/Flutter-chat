@@ -1,3 +1,4 @@
+## version 1.1.0 Chat with added friends only (privacy)
 ## version 1.0.0 dependencies updated
 ## version 0.1.4 user online/offline status
 ## version 0.1.3 widget seprated
