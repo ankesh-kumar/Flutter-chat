@@ -5,6 +5,7 @@ import '../constants.dart';
 class ZoomImage extends StatelessWidget {
   final String url;
   static const String id = "ZoomImage";
+
   ZoomImage({Key key, @required this.url}) : super(key: key);
 
   @override

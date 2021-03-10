@@ -15,7 +15,7 @@ class ChatDBFireStore {
         .collection(getDocName())
         .where('userId', isEqualTo: logInUser.uid)
         .get();
-    final List<DocumentSnapshot> documents = result.documents;
+    final List<DocumentSnapshot> documents = result.docs;
     if (documents.length == 0) {
       // Update data to server if new user
       await saveNewUser(logInUser);
