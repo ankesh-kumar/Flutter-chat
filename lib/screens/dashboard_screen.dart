@@ -15,6 +15,7 @@ List<dynamic> friendList = [];
 class DashboardScreen extends StatefulWidget {
   static const String id = "dashboard_screen";
   final String currentUserId;
+
   DashboardScreen({Key key, @required this.currentUserId}) : super(key: key);
 
   @override
@@ -85,39 +86,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   _showAddFriendDialog() async {
     await showDialog<String>(
-      context: context,
-      child: new _SystemPadding(
-        child: new AlertDialog(
-          contentPadding: const EdgeInsets.all(16.0),
-          content: new Row(
-            children: <Widget>[
-              new Expanded(
-                child: new TextField(
-                  autofocus: true,
-                  controller: friendController,
-                  decoration: new InputDecoration(
-                      labelText: 'user Email', hintText: 'ankeshkumar@live.in'),
-                ),
-              )
-            ],
-          ),
-          actions: <Widget>[
-            new FlatButton(
-                child: const Text('CANCEL'),
-                onPressed: () {
-                  Navigator.pop(context);
-                }),
-            new FlatButton(
-                child: const Text('Add'),
-                onPressed: () {
-                  print(friendController.text);
-                  //if(friendController.text!='')
-                  _addNewFriend();
-                })
-          ],
-        ),
-      ),
-    );
+        context: context,
+        builder: (context) {
+          return _SystemPadding(
+            child: new AlertDialog(
+              contentPadding: const EdgeInsets.all(16.0),
+              content: new Row(
+                children: <Widget>[
+                  new Expanded(
+                    child: new TextField(
+                      autofocus: true,
+                      controller: friendController,
+                      decoration: new InputDecoration(
+                          labelText: 'user Email',
+                          hintText: 'ankeshkumar@live.in'),
+                    ),
+                  )
+                ],
+              ),
+              actions: <Widget>[
+                new TextButton(
+                    child: const Text('CANCEL'),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    }),
+                new TextButton(
+                    child: const Text('Add'),
+                    onPressed: () {
+                      print(friendController.text);
+                      //if(friendController.text!='')
+                      _addNewFriend();
+                    })
+              ],
+            ),
+          );
+        });
   }
 
   void _addNewFriend() {

@@ -15,6 +15,7 @@ class Chat extends StatelessWidget {
   final String peerName;
   final String currentUserId;
   static const String id = "chat";
+
   Chat(
       {Key key,
       @required this.currentUserId,
@@ -132,13 +133,13 @@ class _ChatScreenState extends State<_ChatScreen> {
 
   Future uploadFile() async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
+    Reference reference = FirebaseStorage.instance.ref().child(fileName);
 
     File compressedFile = await FlutterNativeImage.compressImage(imageFile.path,
         quality: 80, percentage: 90);
 
-    StorageUploadTask uploadTask = reference.putFile(compressedFile);
-    StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
+    UploadTask uploadTask = reference.putFile(compressedFile);
+    TaskSnapshot storageTaskSnapshot = await uploadTask;
     storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
       imageUrl = downloadUrl;
       setState(() {
