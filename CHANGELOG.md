@@ -1,3 +1,4 @@
+## version 1.1.2 dependencies updated
 ## version 1.1.1 dependencies updated
 ## version 1.1.0 Chat with added friends only (privacy)
 ## version 1.0.0 dependencies updated
