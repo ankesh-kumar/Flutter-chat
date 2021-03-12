@@ -9,6 +9,7 @@ import '../chatDB.dart';
 import '../chatData.dart';
 import '../chatWidget.dart';
 import '../constants.dart';
+import 'chat.dart';
 
 List<dynamic> friendList = [];
 
@@ -50,7 +51,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         print('Document data: ${documentSnapshot.data()}');
         setState(() {
           friendList = documentSnapshot.data()['friends'];
-          print('Document data:' + friendList[0]);
+          print('Document datas:' + friendList[0]);
         });
       } else {
         print('Document does not exist on the database');
@@ -184,7 +185,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         (friendList.length > 0)
             ? Container(
                 margin: EdgeInsets.fromLTRB(0, 35, 0, 0),
-                child: StreamBuilder(
+                child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection(ChatDBFireStore.getDocName())
                       .where('userId', whereIn: friendList)
@@ -196,15 +197,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           valueColor: AlwaysStoppedAnimation<Color>(themeColor),
                         ),
                       );
-                    } else {
-                      return ListView.builder(
-                        padding: EdgeInsets.all(10.0),
-                        itemBuilder: (context, index) =>
-                            ChatWidget.userListbuildItem(context, currentUserId,
-                                snapshot.data.documents[index]),
-                        itemCount: snapshot.data.documents.length,
-                      );
                     }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Text("Loading");
+                    }
+
+                    return new ListView(
+                        children:
+                            snapshot.data.docs.map((DocumentSnapshot document) {
+                      return new ListTile(
+                        leading: Material(
+                          child: document.data()['photoUrl'] != null
+                              ? ChatWidget.widgetShowImages(
+                                  document.data()['photoUrl'], 50)
+                              : Icon(
+                                  Icons.account_circle,
+                                  size: 50.0,
+                                  color: colorPrimaryDark,
+                                ),
+                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                          clipBehavior: Clip.hardEdge,
+                        ),
+                        title: new Text(document.data()['nickname']),
+                        subtitle: new Text(document.data()['nickname']),
+                        trailing: ConstrainedBox(
+                          constraints: new BoxConstraints(
+                            minHeight: 10.0,
+                            minWidth: 10.0,
+                            maxHeight: 30.0,
+                            maxWidth: 30.0,
+                          ),
+                          child: new DecoratedBox(
+                            decoration: new BoxDecoration(
+                                color: document.data()['online'] == 'online'
+                                    ? Colors.greenAccent
+                                    : Colors.transparent),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Chat(
+                                        currentUserId: currentUserId,
+                                        peerId: document.data()['userId'],
+                                        peerName: document.data()['nickname'],
+                                        peerAvatar: document.data()['photoUrl'],
+                                      )));
+                        },
+                      );
+                    }).toList());
                   },
                 ),
               )

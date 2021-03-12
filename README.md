@@ -12,7 +12,8 @@ If you found this project helpful or you learned something from the source code 
 1. 1-1 chat.
 2. Chat with only added friends(Privacy). New
 3. Share Pic with Gallery/Camera
-2. User online status 
+4. User online status 
+5. Flutter web supported
 
 ## Next Future Scope
 
@@ -43,5 +44,20 @@ dependencies:<br/>[flutter_chat](https://pub.dev/packages/flutter_chat)
     and in body of Widget build:<br/>
     -> ChatData.widgetWelcomeScreen(context)
 
-# Thanks for coffee:
-Eirik Bakken
+
+## Flutter Web
+
+* If want to run Flutter-Chat project, on web 
+Go to App, Firebase->Settings and then add new app, web
+Follow the instructions,
+Put the firebaseConfig script on index.html in web folder,
+<script>
+          // Your web app's Firebase configuration
+          var firebaseConfig = {
+          .....
+          ....
+          
+          }
+</script>
+
+Enjoy Fluttering           

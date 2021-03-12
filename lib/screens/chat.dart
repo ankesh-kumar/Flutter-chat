@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -119,46 +121,70 @@ class _ChatScreenState extends State<_ChatScreen> {
   }
 
   Future getImage(int index) async {
-
     PickedFile selectedFile;
-    File selected = File(selectedFile.path);
 
-    if(index==0)
-        selectedFile= await ImagePicker().getImage(source: ImageSource.gallery);
-    else
-      selectedFile=await ImagePicker().getImage(source: ImageSource.camera);
+    if (kIsWeb) {
+      //selectedFile=await ImagePicker.platform.pickImage(source: ImageSource.gallery);
+      selectedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+    } else {
+      if (index == 0)
+        selectedFile =
+            await ImagePicker().getImage(source: ImageSource.gallery);
+      else
+        selectedFile = await ImagePicker().getImage(source: ImageSource.camera);
 
-    imageFile =File(selectedFile.path);
+      //imageFile =File(selectedFile.path);
 
-    if (imageFile != null) {
+    }
+
+    if (selectedFile != null) {
       setState(() {
+        //orFile=selectedFile;
         isLoading = true;
       });
-      uploadFile();
+      uploadFile(selectedFile);
     }
   }
 
-  Future uploadFile() async {
+  Future uploadFile(PickedFile orFile) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference reference = FirebaseStorage.instance.ref().child(fileName);
+    firebase_storage.Reference reference =
+        firebase_storage.FirebaseStorage.instance.ref().child(fileName);
 
-    File compressedFile = await FlutterNativeImage.compressImage(imageFile.path,
-        quality: 80, percentage: 90);
+    File compressedFile;
+    if (!kIsWeb)
+      compressedFile = await FlutterNativeImage.compressImage(orFile.path,
+          quality: 80, percentage: 90);
 
-    UploadTask uploadTask = reference.putFile(compressedFile);
-    TaskSnapshot storageTaskSnapshot = await uploadTask;
-    storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
-      imageUrl = downloadUrl;
-      setState(() {
-        isLoading = false;
-        onSendMessage(imageUrl, 1);
+    try {
+      firebase_storage.UploadTask uploadTask;
+
+      final metadata = firebase_storage.SettableMetadata(
+          contentType: 'image/jpeg',
+          customMetadata: {'picked-file-path': orFile.path});
+
+      if (kIsWeb)
+        uploadTask = reference.putData(await orFile.readAsBytes(), metadata);
+      else
+        uploadTask = reference.putFile(compressedFile);
+
+      firebase_storage.TaskSnapshot storageTaskSnapshot = await uploadTask;
+
+      storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
+        imageUrl = downloadUrl;
+        setState(() {
+          isLoading = false;
+          onSendMessage(imageUrl, 1);
+        });
+      }, onError: (err) {
+        setState(() {
+          isLoading = false;
+        });
+        Fluttertoast.showToast(msg: 'This file is not an image');
       });
-    }, onError: (err) {
-      setState(() {
-        isLoading = false;
-      });
-      Fluttertoast.showToast(msg: 'This file is not an image');
-    });
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   void onSendMessage(String content, int type) {
@@ -250,16 +276,19 @@ class _ChatScreenState extends State<_ChatScreen> {
             ),
             color: Colors.white,
           ),
-          Material(
-            child: new Container(
-              margin: new EdgeInsets.symmetric(horizontal: 1.0),
-              child: new IconButton(
-                icon: new Icon(Icons.camera_alt),
-                onPressed: () => getImage(1),
-                color: primaryColor,
+          Visibility(
+            visible: !kIsWeb,
+            child: Material(
+              child: new Container(
+                margin: new EdgeInsets.symmetric(horizontal: 1.0),
+                child: new IconButton(
+                  icon: new Icon(Icons.camera_alt),
+                  onPressed: () => getImage(1),
+                  color: primaryColor,
+                ),
               ),
+              color: Colors.white,
             ),
-            color: Colors.white,
           ),
           // Edit text
           Flexible(

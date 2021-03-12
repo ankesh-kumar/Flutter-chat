@@ -130,12 +130,14 @@ class ChatData {
 
   static void authUser(BuildContext context) async {
     bool isValidUser = await ChatData.authUsersGoogle();
-
+    print('isValid' + isValidUser.toString());
     if (isValidUser) {
       if (await ChatData.isSignedIn()) {
+        //print('sign in signin');
         ChatData.checkUserLogin(context);
       }
     } else {
+      print('sign in fail');
       Fluttertoast.showToast(msg: "Sign in fail");
     }
   }
