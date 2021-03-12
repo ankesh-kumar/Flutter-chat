@@ -28,75 +28,75 @@ class ChatWidget {
 
   static Widget userListbuildItem(
       BuildContext context, String currentUserId, DocumentSnapshot document) {
-    print('firebase ' + document.get('userId'));
+    print('adgbasdg_userbuildItem');
+
     print(currentUserId);
     if (document.get('userId') == currentUserId) {
       return Container();
     } else {
       return Container(
-        child: FlatButton(
-          child: Row(
-            children: <Widget>[
-              Material(
-                child: document.get('photoUrl') != null
-                    ? widgetShowImages(document.get('photoUrl'), 50)
-                    : Icon(
-                        Icons.account_circle,
-                        size: 50.0,
-                        color: colorPrimaryDark,
-                      ),
-                borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                clipBehavior: Clip.hardEdge,
-              ),
-              Flexible(
-                child: Container(
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        child: Text(
-                          'Nickname: ${document.get('nickname')}',
-                          style: TextStyle(color: primaryColor),
+        child: ElevatedButton(
+            child: Row(
+              children: <Widget>[
+                Material(
+                  child: document.get('photoUrl') != null
+                      ? widgetShowImages(document.get('photoUrl'), 50)
+                      : Icon(
+                          Icons.account_circle,
+                          size: 50.0,
+                          color: colorPrimaryDark,
                         ),
-                        alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
-                      ),
-                    ],
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                  clipBehavior: Clip.hardEdge,
+                ),
+                Flexible(
+                  child: Container(
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          child: Text(
+                            'Nickname: ${document.get('nickname')}',
+                            style: TextStyle(color: primaryColor),
+                          ),
+                          alignment: Alignment.centerLeft,
+                          margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
+                        ),
+                      ],
+                    ),
+                    margin: EdgeInsets.only(left: 20.0),
                   ),
-                  margin: EdgeInsets.only(left: 20.0),
                 ),
-              ),
-              ConstrainedBox(
-                constraints: new BoxConstraints(
-                  minHeight: 10.0,
-                  minWidth: 10.0,
-                  maxHeight: 30.0,
-                  maxWidth: 30.0,
+                ConstrainedBox(
+                  constraints: new BoxConstraints(
+                    minHeight: 10.0,
+                    minWidth: 10.0,
+                    maxHeight: 30.0,
+                    maxWidth: 30.0,
+                  ),
+                  child: new DecoratedBox(
+                    decoration: new BoxDecoration(
+                        color: document.get('online') == 'online'
+                            ? Colors.greenAccent
+                            : Colors.transparent),
+                  ),
                 ),
-                child: new DecoratedBox(
-                  decoration: new BoxDecoration(
-                      color: document.get('online') == 'online'
-                          ? Colors.greenAccent
-                          : Colors.transparent),
-                ),
-              ),
-            ],
-          ),
-          onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Chat(
-                          currentUserId: currentUserId,
-                          peerId: document.id,
-                          peerName: document.get('nickname'),
-                          peerAvatar: document.get('photoUrl'),
-                        )));
-          },
-          color: viewBg,
-          padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-        ),
+              ],
+            ),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Chat(
+                            currentUserId: currentUserId,
+                            peerId: document.id,
+                            peerName: document.get('nickname'),
+                            peerAvatar: document.get('photoUrl'),
+                          )));
+            },
+            style: ElevatedButton.styleFrom(
+                primary: viewBg,
+                onPrimary: viewBg,
+                padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0))),
         margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
       );
     }
@@ -135,19 +135,16 @@ class ChatWidget {
             height: 48.0,
           ),
           Center(
-            child: FlatButton(
+            child: ElevatedButton(
                 onPressed: () => ChatData.authUser(context),
                 child: Text(
                   'SIGN IN WITH GOOGLE',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                  ),
+                  style: TextStyle(fontSize: 16.0, color: Colors.white),
                 ),
-                color: Color(0xffdd4b39),
-                highlightColor: Color(0xffff7f7f),
-                splashColor: Colors.transparent,
-                textColor: Colors.white,
-                padding: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0)),
+                style: ElevatedButton.styleFrom(
+                    primary: Color(0xffdd4b39),
+                    onPrimary: Color(0xffff7f7f),
+                    padding: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0))),
           ),
         ],
       ),
@@ -241,7 +238,7 @@ class ChatWidget {
           ? Center(
               child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
-          : StreamBuilder(
+          : StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('messages')
                   .doc(groupChatId)
@@ -256,7 +253,7 @@ class ChatWidget {
                           valueColor:
                               AlwaysStoppedAnimation<Color>(themeColor)));
                 } else {
-                  listMessage = snapshot.data.documents;
+                  listMessage = snapshot.data.docs;
                   return ListView.builder(
                     padding: EdgeInsets.all(10.0),
                     itemBuilder: (context, index) =>
@@ -265,9 +262,9 @@ class ChatWidget {
                             listMessage,
                             currentUserId,
                             index,
-                            snapshot.data.documents[index],
+                            snapshot.data.docs[index],
                             peerAvatar),
-                    itemCount: snapshot.data.documents.length,
+                    itemCount: snapshot.data.docs.length,
                     reverse: true,
                     controller: listScrollController,
                   );
@@ -302,20 +299,19 @@ class ChatWidget {
   static Widget chatImage(BuildContext context, String id, var listMessage,
       String chatContent, int index, bool logUserMsg) {
     return Container(
-      child: FlatButton(
-        child: Material(
-          child: widgetShowImages(chatContent, 50),
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-          clipBehavior: Clip.hardEdge,
-        ),
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => ZoomImage(url: chatContent)));
-        },
-        padding: EdgeInsets.all(0),
-      ),
+      child: ElevatedButton(
+          child: Material(
+            child: widgetShowImages(chatContent, 50),
+            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            clipBehavior: Clip.hardEdge,
+          ),
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ZoomImage(url: chatContent)));
+          },
+          style: ElevatedButton.styleFrom(padding: EdgeInsets.all(0))),
       margin: logUserMsg
           ? EdgeInsets.only(
               bottom: ChatData.isLastMessageRight(listMessage, id, index)
