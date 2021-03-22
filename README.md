@@ -39,6 +39,29 @@ dependencies:<br/>[flutter_chat](https://pub.dev/packages/flutter_chat)
 
 * Add [firebase](https://firebase.google.com/) in your android and ios project.
 
+* Security Rules for Storage:
+  
+    rules_version = '2';
+    service firebase.storage {
+      match /b/{bucket}/o {
+        match /{allPaths=**} {
+          allow read, write: if request.auth != null;
+        }
+      }
+    }
+
+* Security Rules for Cloud fireStore:
+  
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /{document=**} {
+         allow read, write: if request.auth != null;
+       }
+     }
+   }
+
+* You can modify the security rules as your need.
+
 * Deploy "Cloud Function"  on firebase. (provided on cloudFunction folder, used for show user online/offline status).  
 
 * Create a Stateful widget class and call the method in body (example can be found in Github repo),<br/> 
