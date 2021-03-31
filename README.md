@@ -2,7 +2,7 @@
 A Chat Helper for create chat application in Flutter using Firebase as backend services.
 
 # Checkout Web Demo
-[Just Chat Demo](https://just-chat-eb4e7.web.app)
+[Just Chat Web Demo](http://justchat.smartmobilevilla.com)
 
 # Support Development
 If you found this project helpful or you learned something from the source code and want to thank me, consider buying me a cup of ☕️
