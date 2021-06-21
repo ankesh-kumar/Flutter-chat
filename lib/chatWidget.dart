@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'chatDB.dart';
 import 'chatData.dart';
 import 'constants.dart';
@@ -28,9 +31,9 @@ class ChatWidget {
 
   static Widget userListbuildItem(
       BuildContext context, String currentUserId, DocumentSnapshot document) {
-    print('adgbasdg_userbuildItem');
+    //print('adgbasdg_userbuildItem');
 
-    print(currentUserId);
+    //print(currentUserId);
     if (document.get('userId') == currentUserId) {
       return Container();
     } else {
@@ -136,7 +139,9 @@ class ChatWidget {
           ),
           Center(
             child: ElevatedButton(
-                onPressed: () => ChatData.authUser(context),
+                onPressed: () {
+                  ChatData.authUser(context);
+                },
                 child: Text(
                   'SIGN IN WITH GOOGLE',
                   style: TextStyle(fontSize: 16.0, color: Colors.white),
@@ -232,20 +237,18 @@ class ChatWidget {
   }
 
   static Widget widgetChatBuildListMessage(groupChatId, listMessage,
-      currentUserId, peerAvatar, listScrollController) {
+      currentUserId, peerAvatar, listScrollController, var stCollection) {
+    Stream<QuerySnapshot> _streamChatData;
+    _streamChatData =
+        ChatDBFireStore().streamChatDataList(stCollection, groupChatId);
+
     return Flexible(
       child: groupChatId == ''
           ? Center(
               child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
           : StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('messages')
-                  .doc(groupChatId)
-                  .collection(groupChatId)
-                  .orderBy('timestamp', descending: true)
-                  .limit(20)
-                  .snapshots(),
+              stream: _streamChatData,
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return Center(
@@ -277,12 +280,24 @@ class ChatWidget {
   static Widget chatText(String chatContent, String id, var listMessage,
       int index, bool logUserMsg) {
     return Container(
-      child: Text(
-        chatContent,
+      child: Linkify(
+        onOpen: (link) async {
+          if (await canLaunch(link.url)) {
+            await launch(link.url);
+          } else {
+            throw 'Could not launch $link';
+          }
+        },
+        text: chatContent,
         style: TextStyle(color: logUserMsg ? primaryColor : Colors.white),
+        linkStyle: TextStyle(color: Colors.blueGrey),
       ),
+      // Text(
+      //   chatContent,
+      //   style: TextStyle(color: logUserMsg ? primaryColor : Colors.white),
+      // ),
       padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-      width: 200.0,
+      width: kIsWeb ? 400 : 200.0,
       decoration: BoxDecoration(
           color: logUserMsg ? greyColor2 : primaryColor,
           borderRadius: BorderRadius.circular(8.0)),
@@ -301,8 +316,10 @@ class ChatWidget {
     return Container(
       child: ElevatedButton(
           child: Material(
-            child: widgetShowImages(chatContent, 50),
-            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            child: kIsWeb
+                ? widgetShowImages(chatContent, 250)
+                : widgetShowImages(chatContent, 100),
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
             clipBehavior: Clip.hardEdge,
           ),
           onPressed: () {
@@ -311,7 +328,7 @@ class ChatWidget {
                 MaterialPageRoute(
                     builder: (context) => ZoomImage(url: chatContent)));
           },
-          style: ElevatedButton.styleFrom(padding: EdgeInsets.all(0))),
+          style: ElevatedButton.styleFrom(padding: EdgeInsets.all(10.0))),
       margin: logUserMsg
           ? EdgeInsets.only(
               bottom: ChatData.isLastMessageRight(listMessage, id, index)
@@ -326,6 +343,15 @@ class ChatWidget {
   static Widget widgetShowImages(String imageUrl, double imageSize) {
     return CachedNetworkImage(
       imageUrl: imageUrl,
+      imageBuilder: (context, imageProvider) => Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: imageProvider,
+            fit: BoxFit.cover,
+            //colorFilter:ColorFilter.mode(Colors.red, BlendMode.colorBurn)
+          ),
+        ),
+      ),
       height: imageSize,
       width: imageSize,
       placeholder: (context, url) => CircularProgressIndicator(),

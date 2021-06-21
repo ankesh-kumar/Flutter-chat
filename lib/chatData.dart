@@ -13,7 +13,7 @@ import 'screens/dashboard_screen.dart';
 import 'screens/login_screen.dart';
 
 class ChatData {
-  static String appName = "";
+  static String appName = "Just Chat ";
 
   static Future<Null> openDialog(BuildContext context) async {
     switch (await showDialog(
@@ -95,9 +95,12 @@ class ChatData {
     await FirebaseAuth.instance.signOut();
     await googleSignIn.disconnect();
     await googleSignIn.signOut();
+
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 
-  static Future<bool> authUsersGoogle() async {
+  static Future<bool> authUsersGoogle(BuildContext context) async {
     await Firebase.initializeApp();
     final GoogleSignIn googleSignIn = GoogleSignIn();
     final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
@@ -116,9 +119,39 @@ class ChatData {
     if (logInUser != null) {
       // Check is already sign up
       await ChatDBFireStore.checkUserExists(firebaseAuth.currentUser);
+
+      final User logInUser =
+          (await firebaseAuth.signInWithCredential(credential)).user;
+
+      /**
+       * Make user online
+       */
+      await ChatDBFireStore.makeUserOnline(logInUser);
+
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  DashboardScreen(currentUserId: logInUser.uid)));
       return true;
     } else {
       return false;
+    }
+  }
+
+  static Future<bool> checkUserLoggedin(BuildContext context) async {
+    User user = FirebaseAuth.instance.currentUser;
+    if (user != null)
+      return true;
+    else
+      return false;
+  }
+
+  static String getGroupChatID(String logInUserId, String peerId) {
+    if (logInUserId.hashCode <= peerId.hashCode) {
+      return '$logInUserId-$peerId';
+    } else {
+      return '$peerId-$logInUserId';
     }
   }
 
@@ -129,15 +162,15 @@ class ChatData {
   }
 
   static void authUser(BuildContext context) async {
-    bool isValidUser = await ChatData.authUsersGoogle();
-    print('isValid' + isValidUser.toString());
+    bool isValidUser = await ChatData.authUsersGoogle(context);
+    //print('isValid' + isValidUser.toString());
     if (isValidUser) {
-      if (await ChatData.isSignedIn()) {
-        //print('sign in signin');
-        ChatData.checkUserLogin(context);
-      }
+      //if (await ChatData.isSignedIn()) {
+      ////print('sign in signin');
+      //ChatData.checkUserLogin(context);
+
     } else {
-      print('sign in fail');
+      //print('sign in fail');
       Fluttertoast.showToast(msg: "Sign in fail");
     }
   }
@@ -169,6 +202,12 @@ class ChatData {
        * Make user online
        */
       await ChatDBFireStore.makeUserOnline(logInUser);
+
+      // Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) =>
+      //             DashboardScreen(currentUserId: logInUser.uid)));
 
       Navigator.pushReplacement(
           context,

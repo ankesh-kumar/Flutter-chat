@@ -1,15 +1,14 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import '../chatWidget.dart';
 import '../constants.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Chat extends StatelessWidget {
   final String peerId;
@@ -75,6 +74,7 @@ class _ChatScreenState extends State<_ChatScreen> {
   bool isLoading;
   bool isShowSticker;
   String imageUrl;
+  var stCollection = 'messages';
 
   final TextEditingController textEditingController =
       new TextEditingController();
@@ -180,7 +180,6 @@ class _ChatScreenState extends State<_ChatScreen> {
         setState(() {
           isLoading = false;
         });
-        Fluttertoast.showToast(msg: 'This file is not an image');
       });
     } catch (e) {
       print(e.toString());
@@ -230,8 +229,13 @@ class _ChatScreenState extends State<_ChatScreen> {
           Column(
             children: <Widget>[
               // List of messages
-              ChatWidget.widgetChatBuildListMessage(groupChatId, listMessage,
-                  widget.currentUserId, peerAvatar, listScrollController),
+              ChatWidget.widgetChatBuildListMessage(
+                  groupChatId,
+                  listMessage,
+                  widget.currentUserId,
+                  peerAvatar,
+                  listScrollController,
+                  stCollection),
 
               // Input content
               buildInput(),

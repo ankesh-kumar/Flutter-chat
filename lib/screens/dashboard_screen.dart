@@ -1,15 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import '../chatDB.dart';
 import '../chatData.dart';
 import '../chatWidget.dart';
 import '../constants.dart';
 import 'chat.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 List<dynamic> friendList = [];
 
@@ -25,6 +23,8 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   _DashboardScreenState({Key key});
+  List<StreamSubscription> unreadSubscriptions = [];
+  List<StreamController> controllers = [];
 
   bool isLoading = false;
   bool addNewFriend = false;
@@ -35,38 +35,68 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final friendController = TextEditingController();
 
+  Stream<QuerySnapshot> _streamFriendList;
+
   @override
   void initState() {
     super.initState();
-    getFriendList();
   }
 
-  Future<String> getFriendList() async {
-    FirebaseFirestore.instance
+  Future<List<dynamic>> getFriendList(bool onLoad) async {
+    await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.currentUserId)
         .get()
         .then((DocumentSnapshot documentSnapshot) {
       if (documentSnapshot.exists) {
-        print('Document data: ${documentSnapshot.data()}');
-        setState(() {
-          friendList = documentSnapshot.data()['friends'];
-          print('Document datas:' + friendList[0]);
-        });
+        //print('Document data: ${documentSnapshot.data()}');
+        //setState(() {
+        friendList = documentSnapshot.get('friends');
+        return friendList;
+        //});
       } else {
-        print('Document does not exist on the database');
+        return friendList;
       }
     });
+    return friendList;
+  }
+
+  void goExit() async {
+    await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Confirmation'),
+            content: Text('Do you want to logout?'),
+            actions: <Widget>[
+              new TextButton(
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop(
+                      false); // dismisses only the dialog and returns false
+                },
+                child: Text('No'),
+              ),
+              TextButton(
+                onPressed: () {
+                  ChatData.handleSignOut(context);
+                },
+                child: Text('Yes'),
+              ),
+            ],
+          );
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: ChatWidget.getAppBar(),
-      backgroundColor: Colors.white,
-      body: WillPopScope(
-        child: showFriendList(widget.currentUserId),
-        onWillPop: onBackPress,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: WillPopScope(
+          child: showFriendList(widget.currentUserId),
+          onWillPop: onBackPress,
+        ),
       ),
     );
   }
@@ -78,7 +108,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget showAddFriend() {
     return Container(
-      child: RaisedButton(
+      padding: EdgeInsets.all(10.0),
+      child: TextButton(
         child: Text('Add New Friend'),
         onPressed: _showAddFriendDialog,
       ),
@@ -100,7 +131,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       controller: friendController,
                       decoration: new InputDecoration(
                           labelText: 'user Email',
-                          hintText: 'ankeshkumar@live.in'),
+                          hintText: 'smartmobilevilla@gmail.com'),
                     ),
                   )
                 ],
@@ -114,9 +145,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 new TextButton(
                     child: const Text('Add'),
                     onPressed: () {
-                      print(friendController.text);
-                      //if(friendController.text!='')
-                      _addNewFriend();
+                      Navigator.pop(context);
+                      if (friendController.text != '') _addNewFriend();
                     })
               ],
             ),
@@ -124,7 +154,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
   }
 
-  void _addNewFriend() {
+  void _addNewFriend() async {
+    friendList = await getFriendList(true);
+
     FirebaseFirestore.instance
         .collection('users')
         .where('email', isEqualTo: friendController.text)
@@ -133,6 +165,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (value.docs.length > 0) {
         value.docs.forEach((result) {
           bool alreadyExist = false;
+
           for (var fr in friendList) {
             if (fr == result.data()['userId']) alreadyExist = true;
           }
@@ -143,11 +176,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             FirebaseFirestore.instance
                 .collection('users')
                 .doc(widget.currentUserId)
-                .update({"friends": friendList}).whenComplete(
-                    () => showToast("friend successfully added", false));
+                .update({"friends": friendList}).whenComplete(() {
+              // Navigator.pop(context);
+              setState(() {
+                getFriendList(true);
+              });
+              // getFriendList(true);
+            });
           }
           friendController.text = "";
-          Navigator.pop(context);
         });
       } else {
         showToast("No user found with this email.", true);
@@ -157,7 +194,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   showToast(var text, bool error) {
-    if (error == false) getFriendList();
+    // if (error == false){
+    //
+    // }
 
     Fluttertoast.showToast(
         msg: text,
@@ -182,78 +221,226 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
-        (friendList.length > 0)
-            ? Container(
-                margin: EdgeInsets.fromLTRB(0, 35, 0, 0),
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection(ChatDBFireStore.getDocName())
-                      .where('userId', whereIn: friendList)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                        ),
-                      );
-                    }
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Text("Loading");
-                    }
 
-                    return new ListView(
-                        children:
-                            snapshot.data.docs.map((DocumentSnapshot document) {
-                      return new ListTile(
-                        leading: Material(
-                          child: document.data()['photoUrl'] != null
-                              ? ChatWidget.widgetShowImages(
-                                  document.data()['photoUrl'], 50)
-                              : Icon(
-                                  Icons.account_circle,
-                                  size: 50.0,
-                                  color: colorPrimaryDark,
-                                ),
-                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                          clipBehavior: Clip.hardEdge,
-                        ),
-                        title: new Text(document.data()['nickname']),
-                        subtitle: new Text(document.data()['nickname']),
-                        trailing: ConstrainedBox(
-                          constraints: new BoxConstraints(
-                            minHeight: 10.0,
-                            minWidth: 10.0,
-                            maxHeight: 30.0,
-                            maxWidth: 30.0,
-                          ),
-                          child: new DecoratedBox(
-                            decoration: new BoxDecoration(
-                                color: document.data()['online'] == 'online'
-                                    ? Colors.greenAccent
-                                    : Colors.transparent),
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Chat(
-                                        currentUserId: currentUserId,
-                                        peerId: document.data()['userId'],
-                                        peerName: document.data()['nickname'],
-                                        peerAvatar: document.data()['photoUrl'],
-                                      )));
-                        },
-                      );
-                    }).toList());
-                  },
-                ),
-              )
-            : Container()
+        FutureBuilder<List<dynamic>>(
+            future: getFriendList(true),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                List<dynamic> newFrList = snapshot.data;
+                if (newFrList.length > 0) {
+                  return widgetFriendList(currentUserId, newFrList);
+                } else {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Center(
+                          child: Text(
+                        'No Friend in your list\nAdd New Friend to start chat',
+                        style: TextStyle(fontSize: 16.0),
+                      )),
+                    ],
+                  );
+                }
+              } else {
+                return Center(
+                  child: Text('Loading FriendList'),
+                );
+              }
+            }),
       ],
     );
   }
+
+  Widget widgetFriendList(var currentUserId, List<dynamic> friendLists) {
+    return Container(
+      margin: EdgeInsets.fromLTRB(0, 35, 0, 0),
+      child: StreamBuilder<QuerySnapshot>(
+        stream: streamFriendList(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+              ),
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Text("Loading");
+          }
+
+          return new ListView(
+              children: snapshot.data.docs.map((DocumentSnapshot document) {
+            return (document.get('userId') == currentUserId)
+                ? SizedBox(
+                    height: 2,
+                  )
+                : new ListTile(
+                    leading: Material(
+                      child: document.get('photoUrl') != null
+                          ? ChatWidget.widgetShowImages(
+                              document.get('photoUrl'), 50)
+                          : Icon(
+                              Icons.account_circle,
+                              size: 50.0,
+                              color: colorPrimaryDark,
+                            ),
+                      borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                      clipBehavior: Clip.hardEdge,
+                    ),
+                    title: new Text(document.get('nickname')),
+                    subtitle: new Text(document.get('nickname')),
+                    trailing: Wrap(
+                      children: [
+                        Container(
+                          height: 40,
+                          width: 40,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: 10,
+                                width: 10,
+                                child: new DecoratedBox(
+                                  decoration: new BoxDecoration(
+                                      color: document.get('online') == 'online'
+                                          ? Colors.greenAccent
+                                          : Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        StreamBuilder(
+                            stream: getUnread(document.get('userId')),
+                            builder: (context,
+                                AsyncSnapshot<MessageData> unreadData) {
+                              int unreadMsg =
+                                  0; //unreadData.data.snapshot.docs.length -1;
+                              if (unreadData.hasData &&
+                                  unreadData.data.snapshot.docs.isNotEmpty) {
+                                for (int i = 0;
+                                    i < unreadData.data.snapshot.docs.length;
+                                    i++) {
+                                  try {
+                                    if (int.parse(unreadData.data.lastSeen
+                                                .toString()) <
+                                            int.parse(unreadData.data.snapshot
+                                                .docs[i]['timestamp']
+                                                .toString()) &&
+                                        unreadData
+                                                .data.snapshot.docs[i]['idFrom']
+                                                .toString() !=
+                                            currentUserId.toString())
+                                      unreadMsg = unreadMsg + 1;
+                                  } catch (ex) {
+                                    print('exception' + ex.toString());
+                                  }
+                                }
+                              }
+                              return unreadMsg > 0
+                                  ? Container(
+                                      height: 40,
+                                      width: 40,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(unreadMsg.toString(),
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors.black,
+                                                  fontWeight:
+                                                      FontWeight.normal)),
+                                        ],
+                                      ),
+                                      //: Container(width: 0, height: 0),
+
+                                      decoration: BoxDecoration(
+                                        border: Border.all(width: 2),
+                                        shape: BoxShape.circle,
+                                        color: Colors.amber,
+                                      ),
+                                    )
+                                  : SizedBox(
+                                      height: 10,
+                                    );
+                            }),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Chat(
+                                    currentUserId: widget.currentUserId,
+                                    peerId: document.get('userId'),
+                                    peerName: document.get('nickname'),
+                                    peerAvatar: document.get('photoUrl'),
+                                  )));
+                    },
+                  );
+          }).toList());
+        },
+      ),
+    );
+  }
+
+  Stream<MessageData> getUnread(var peerId) {
+    var id = widget.currentUserId ?? '';
+    var groupChatId = ChatData.getGroupChatID(id, peerId);
+
+    //ChatDBFireStore().setChatLastSeen(widget.currentUserId,'messages',groupChatId);
+    //ChatDBFireStore().setChatLastSeen(peerId,'messages',groupChatId);
+
+    try {
+      print('unreadData ' + groupChatId);
+      var controller = StreamController<MessageData>.broadcast();
+
+      unreadSubscriptions.add(FirebaseFirestore.instance
+          .collection('messages')
+          .doc(groupChatId)
+          .snapshots()
+          .listen((doc) {
+        if (doc[id] != null) {
+          unreadSubscriptions.add(FirebaseFirestore.instance
+              .collection('messages')
+              .doc(groupChatId)
+              .collection(groupChatId)
+              .snapshots()
+              .listen((snapshot) {
+            controller.add(MessageData(snapshot: snapshot, lastSeen: doc[id]));
+          }));
+        }
+      }));
+      controllers.add(controller);
+      return controller.stream;
+    } catch (e) {
+      print('unreadExcept' + e.toString());
+    }
+    return null;
+  }
+
+  Stream<QuerySnapshot> streamFriendList() {
+    return FirebaseFirestore.instance
+        .collection(ChatDBFireStore.getDocName())
+        .where('userId', whereIn: friendList)
+        .snapshots();
+
+    // friendList = documentSnapshot.data()['friends'];
+  }
+}
+
+class MessageData {
+  int lastSeen;
+  QuerySnapshot snapshot;
+  MessageData({@required this.snapshot, @required this.lastSeen});
 }
 
 class _SystemPadding extends StatelessWidget {

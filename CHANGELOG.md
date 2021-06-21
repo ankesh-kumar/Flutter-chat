@@ -1,3 +1,4 @@
+## version 2.0.2 dependencies update and code improvement
 ## version 2.0.1 flutter web demo added
 ## version 2.0.0 Flutter Web Support added
 ## version 1.1.2 dependencies updated

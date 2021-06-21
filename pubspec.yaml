@@ -1,7 +1,7 @@
 name: flutter_chat
-description: Social Chat for Flutter android , iOS and flutter-web using firebase as backend services.
+description: Messaging app for Flutter android , iOS and flutter-web using firebase as backend services.
 
-version: 2.0.1
+version: 2.0.2
 homepage: https://github.com/ankesh-kumar/Flutter-chat-sdk
 
 environment:
@@ -19,7 +19,7 @@ dependencies:
   firebase_core: ^1.0.1
   firebase_auth: ^1.0.1
   firebase_storage: ^8.0.0
-  cloud_firestore: ^1.0.1
+  cloud_firestore: ^2.2.2
   fluttertoast: ^7.1.8
   photo_view: ^0.11.1
   google_sign_in: ^5.0.0
@@ -30,8 +30,11 @@ dependencies:
   image_picker: ^0.7.2+1
   image_picker_for_web: ^2.0.0
   path: ^1.8.0
-  mime_type: ^1.0.0
-
+  firebase_messaging: ^10.0.0
+  flutter_local_notifications: ^5.0.0+2
+  url_launcher: ^6.0.2
+  flutter_linkify: ^4.0.2
+  http: ^0.13.0
 
 dev_dependencies:
   flutter_test:
